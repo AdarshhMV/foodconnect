@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="row justify-content-center">
+    <div class="col-lg-8 col-xl-6">
+        <div class="card narrow auth-card fade-card">
+            <div class="card-body p-lg-5">
+                <span class="eyebrow">Join the network</span>
+                <h1>Create your account</h1>
+                <p>Sign up as a donor or receiver and start coordinating food sharing in minutes.</p>
+                <form method="post" class="stack-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-success ui-btn w-100">Sign Up</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

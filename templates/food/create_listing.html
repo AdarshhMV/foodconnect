@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+>
+{% endblock %}
+
+{% block content %}
+<section class="row justify-content-center">
+    <div class="col-lg-8">
+        <section class="card narrow fade-card">
+            <div class="card-body p-lg-5">
+                <span class="eyebrow">New donation</span>
+                <h1>Create a food listing</h1>
+                <p>Add clear details so receivers can quickly decide whether they can pick this up.</p>
+                <form method="post" class="stack-form">
+                    {% csrf_token %}
+                    {{ form.latitude }}
+                    {{ form.longitude }}
+                    <p>
+                        {{ form.title.label_tag }}
+                        {{ form.title }}
+                    </p>
+                    <p>
+                        {{ form.description.label_tag }}
+                        {{ form.description }}
+                    </p>
+                    <p>
+                        {{ form.quantity.label_tag }}
+                        {{ form.quantity }}
+                    </p>
+                    <p>
+                        {{ form.pickup_location.label_tag }}
+                        {{ form.pickup_location }}
+                    </p>
+                    <div class="location-picker-card">
+                        <div class="location-picker-header">
+                            <div>
+                                <label class="form-label mb-1">Select pickup point on map</label>
+                                <p class="mb-0">Click anywhere on the map to drop a marker and save latitude/longitude.</p>
+                            </div>
+                        </div>
+                        <div id="listing-location-map" class="listing-location-map" aria-label="Location picker map"></div>
+                        <div class="selected-coordinates" id="selected-coordinates">
+                            <span><i class="bi bi-geo-alt-fill"></i> No map point selected yet</span>
+                        </div>
+                    </div>
+                    <p>
+                        {{ form.expiry_date.label_tag }}
+                        {{ form.expiry_date }}
+                    </p>
+                    <button type="submit" class="btn btn-success ui-btn w-100">Publish Listing</button>
+                </form>
+            </div>
+        </section>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+></script>
+<script src="{% static 'js/listing-location-picker.js' %}"></script>
+{% endblock %}

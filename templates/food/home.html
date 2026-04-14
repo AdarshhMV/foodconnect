@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load food_extras %}
+
+{% block content %}
+<section class="hero surface-panel row align-items-center g-4">
+    <div class="col-lg-8 hero-copy">
+        <span class="eyebrow">Community food sharing</span>
+        <h1>Share surplus food with nearby people</h1>
+        <p>FoodConnect helps donors post available food and receivers claim it quickly.</p>
+    </div>
+    <div class="col-lg-4">
+        {% if user.is_authenticated and user.role == 'donor' %}
+            <div class="hero-cta-card">
+                <p class="mb-3">Have extra food ready to share today?</p>
+                <a class="btn btn-success btn-lg w-100 ui-btn" href="{% url 'create_listing' %}">Create Listing</a>
+            </div>
+        {% else %}
+            <div class="hero-stat">
+                <strong>{{ listings|length }}</strong>
+                <span>active community listings</span>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section-heading d-flex justify-content-between align-items-end">
+    <div>
+        <span class="eyebrow">Live inventory</span>
+        <h2>Available food listings</h2>
+    </div>
+</section>
+
+<section class="row g-4 listing-grid">
+    {% for listing in listings %}
+        <div class="col-md-6 col-xl-4">
+            <article class="card listing-card listing-card-modern fade-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="listing-card-top">
+                        <span class="listing-chip">{{ listing.get_status_display }}</span>
+                        <span class="listing-donor"><i class="bi bi-shop-window"></i> {{ listing.donor.username }}</span>
+                    </div>
+                    <div class="listing-copy">
+                        <h2 class="listing-title">{{ listing.title }}</h2>
+                        <p class="listing-description flex-grow-1">{{ listing.description }}</p>
+                    </div>
+                    <div class="listing-meta-grid">
+                        <div class="listing-meta-item">
+                            <span class="listing-meta-icon"><i class="bi bi-box-seam"></i></span>
+                            <div>
+                                <small>Quantity</small>
+                                <strong>{{ listing.quantity }}</strong>
+                            </div>
+                        </div>
+                        <div class="listing-meta-item">
+                            <span class="listing-meta-icon"><i class="bi bi-geo-alt"></i></span>
+                            <div>
+                                <small>Location</small>
+                                <strong>{{ listing.pickup_location }}</strong>
+                            </div>
+                        </div>
+                        <div class="listing-meta-item listing-meta-item-wide">
+                            <span class="listing-meta-icon"><i class="bi bi-clock-history"></i></span>
+                            <div>
+                                <small>Expiry time</small>
+                                <strong>{{ listing.expiry_date|date:"M d, Y H:i" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated and user.role == 'receiver' and listing.status == 'available' %}
+                        <form method="post" action="{% url 'claim_listing' listing.pk %}" class="stack-form mt-3 listing-card-action">
+                            {% csrf_token %}
+                            {{ claim_forms|get_item:listing.id }}
+                            <button type="submit" class="btn btn-success ui-btn w-100">
+                                <i class="bi bi-bag-check me-2"></i>Request Food
+                            </button>
+                        </form>
+                    {% elif listing.status == 'claimed' %}
+                        <p class="claimed-note mt-3 mb-0 listing-card-note"><i class="bi bi-check-circle me-2"></i>This listing has already been claimed.</p>
+                    {% elif not user.is_authenticated %}
+                        <p class="muted mt-3 mb-0 listing-card-note"><i class="bi bi-person-lock me-2"></i>Log in as a receiver to claim food.</p>
+                    {% endif %}
+                </div>
+            </article>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <article class="card fade-card empty-state">
+                <div class="card-body text-center py-5">
+                    <h2>No listings available</h2>
+                    <p class="mb-0">Check back later or sign up as a donor to post food.</p>
+                </div>
+            </article>
+        </div>
+    {% endfor %}
+</section>
+{% endblock %}

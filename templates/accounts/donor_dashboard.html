@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero surface-panel row align-items-center g-4">
+    <div class="col-lg-8 hero-copy">
+        <span class="eyebrow">Donor workspace</span>
+        <h1>Donor Dashboard</h1>
+        <p>Manage your food listings and track incoming requests from receivers.</p>
+    </div>
+    <div class="col-lg-4">
+        <div class="hero-cta-card">
+            <p class="mb-3">Keep good food moving with a new donation.</p>
+            <a class="btn btn-success btn-lg w-100 ui-btn" href="{% url 'create_listing' %}">Add New Listing</a>
+        </div>
+    </div>
+</section>
+
+<section class="row g-4">
+    <div class="col-xl-6">
+    <article class="card fade-card h-100">
+        <div class="card-body">
+        <h2 class="section-card-title">My Listings</h2>
+        {% if my_listings %}
+            <div class="row g-3">
+                {% for listing in my_listings %}
+                    <div class="col-12">
+                        <article class="listing-card-dashboard panel-row">
+                            <div class="listing-card-top">
+                                <span class="listing-chip">{{ listing.get_status_display }}</span>
+                                <span class="listing-donor"><i class="bi bi-person-heart"></i> Your listing</span>
+                            </div>
+                            <div class="listing-copy">
+                                <h3 class="listing-title">{{ listing.title }}</h3>
+                                <p class="listing-description mb-0">{{ listing.description }}</p>
+                            </div>
+                            <div class="listing-meta-grid listing-meta-grid-dashboard">
+                                <div class="listing-meta-item">
+                                    <span class="listing-meta-icon"><i class="bi bi-box-seam"></i></span>
+                                    <div>
+                                        <small>Quantity</small>
+                                        <strong>{{ listing.quantity }}</strong>
+                                    </div>
+                                </div>
+                                <div class="listing-meta-item">
+                                    <span class="listing-meta-icon"><i class="bi bi-geo-alt"></i></span>
+                                    <div>
+                                        <small>Location</small>
+                                        <strong>{{ listing.pickup_location }}</strong>
+                                    </div>
+                                </div>
+                                <div class="listing-meta-item listing-meta-item-wide">
+                                    <span class="listing-meta-icon"><i class="bi bi-clock-history"></i></span>
+                                    <div>
+                                        <small>Expiry time</small>
+                                        <strong>{{ listing.expiry_date|date:"M d, Y H:i" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'delete_listing' listing.pk %}" class="listing-card-action">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger ui-btn w-100 w-sm-auto">
+                                    <i class="bi bi-trash3 me-2"></i>Delete
+                                </button>
+                            </form>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You have not created any listings yet.</p>
+        {% endif %}
+        </div>
+    </article>
+    </div>
+
+    <div class="col-xl-6">
+    <article class="card fade-card h-100">
+        <div class="card-body">
+        <h2 class="section-card-title">Incoming Requests</h2>
+        {% if incoming_requests %}
+            <div class="list">
+                {% for claim in incoming_requests %}
+                    <div class="list-item panel-row">
+                        <div>
+                            <h3>{{ claim.listing.title }}</h3>
+                            <p>{{ claim.receiver.username }} requested this listing.</p>
+                            <small>{{ claim.message|default:'No message provided.' }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No incoming requests yet.</p>
+        {% endif %}
+        </div>
+    </article>
+    </div>
+</section>
+{% endblock %}

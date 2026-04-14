@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+>
+{% endblock %}
+
+{% block content %}
+<section class="hero surface-panel row align-items-center g-4">
+    <div class="col-lg-8 hero-copy">
+        <span class="eyebrow">Receiver workspace</span>
+        <h1>Receiver Dashboard</h1>
+        <p>Browse food listings and send requests for items you need.</p>
+    </div>
+    <div class="col-lg-4">
+        <div class="hero-cta-card hero-soft">
+            <p class="mb-0">Use the map and listing cards below to quickly find nearby donations.</p>
+        </div>
+    </div>
+</section>
+
+<section class="card map-card fade-card">
+    <div class="card-body">
+    <div class="map-header">
+        <div>
+            <h2>Food Map</h2>
+            <p>Listings with saved coordinates appear on the map below.</p>
+        </div>
+    </div>
+    {% if listings_map_data %}
+        <div id="receiver-listings-map" class="listings-map" aria-label="Map of food listings"></div>
+        {{ listings_map_data|json_script:"receiver-listings-map-data" }}
+    {% else %}
+        <p class="muted">No listing coordinates are available yet. Add latitude and longitude when donors create listings.</p>
+    {% endif %}
+    </div>
+</section>
+
+<section class="row g-4">
+    <div class="col-xl-7">
+    <article class="card fade-card h-100">
+        <div class="card-body">
+        <h2 class="section-card-title">All Food Listings</h2>
+        {% if available_listings %}
+            <div class="row g-3">
+                {% for listing in available_listings %}
+                    <div class="col-12">
+                        <article class="listing-card-dashboard panel-row">
+                            <div class="listing-card-top">
+                                <span class="listing-chip">{{ listing.get_status_display }}</span>
+                                <span class="listing-donor"><i class="bi bi-shop-window"></i> {{ listing.donor.username }}</span>
+                            </div>
+                            <div class="listing-copy">
+                                <h3 class="listing-title">{{ listing.title }}</h3>
+                                <p class="listing-description mb-0">{{ listing.description }}</p>
+                            </div>
+                            <div class="listing-meta-grid listing-meta-grid-dashboard">
+                                <div class="listing-meta-item">
+                                    <span class="listing-meta-icon"><i class="bi bi-box-seam"></i></span>
+                                    <div>
+                                        <small>Quantity</small>
+                                        <strong>{{ listing.quantity }}</strong>
+                                    </div>
+                                </div>
+                                <div class="listing-meta-item">
+                                    <span class="listing-meta-icon"><i class="bi bi-geo-alt"></i></span>
+                                    <div>
+                                        <small>Location</small>
+                                        <strong>{{ listing.pickup_location }}</strong>
+                                    </div>
+                                </div>
+                                <div class="listing-meta-item listing-meta-item-wide">
+                                    <span class="listing-meta-icon"><i class="bi bi-clock-history"></i></span>
+                                    <div>
+                                        <small>Expiry time</small>
+                                        <strong>{{ listing.expiry_date|date:"M d, Y H:i" }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="listing-card-action">
+                                {% if listing.donor_id == request.user.id %}
+                                    <span class="muted listing-card-note"><i class="bi bi-person-check me-2"></i>Your listing</span>
+                                {% elif listing.status == 'claimed' %}
+                                    <span class="muted listing-card-note"><i class="bi bi-patch-check me-2"></i>Already requested</span>
+                                {% else %}
+                                    <a class="btn btn-success ui-btn w-100 w-sm-auto" href="{% url 'claim_listing' listing.pk %}">
+                                        <i class="bi bi-bag-check me-2"></i>Request Food
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No food listings are available right now.</p>
+        {% endif %}
+        </div>
+    </article>
+    </div>
+
+    <div class="col-xl-5">
+    <article class="card fade-card h-100">
+        <div class="card-body">
+        <h2 class="section-card-title">My Requests</h2>
+        {% if my_claims %}
+            <div class="list">
+                {% for claim in my_claims %}
+                    <div class="list-item panel-row">
+                        <div>
+                            <h3>{{ claim.listing.title }}</h3>
+                            <p>{{ claim.message|default:'No message added.' }}</p>
+                            <small>Pickup: {{ claim.listing.pickup_location }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>You have not requested any food yet.</p>
+        {% endif %}
+        </div>
+    </article>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if listings_map_data %}
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+></script>
+<script src="{% static 'js/receiver-dashboard-map.js' %}"></script>
+{% endif %}
+{% endblock %}
