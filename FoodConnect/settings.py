@@ -74,6 +74,7 @@ TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 USE_TZ = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
